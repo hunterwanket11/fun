@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Good Morning Joke</title>
+  <title>Daily Joke</title>
   <style>
     * {
       margin: 0;
@@ -20,6 +20,11 @@
       justify-content: center;
       font-family: 'Georgia', serif;
       padding: 24px;
+      transition: background 0.8s ease;
+    }
+
+    body.night {
+      background: linear-gradient(135deg, #0b1d3a 0%, #1a2a4f 30%, #2c3e6b 60%, #4a5d8a 100%);
     }
 
     .sun {
@@ -27,6 +32,10 @@
       animation: rise 1.2s ease-out;
       margin-bottom: 16px;
       filter: drop-shadow(0 4px 16px rgba(255,180,0,0.6));
+    }
+
+    body.night .sun {
+      filter: drop-shadow(0 4px 16px rgba(200,220,255,0.6));
     }
 
     @keyframes rise {
@@ -113,6 +122,50 @@
       color: #fff;
     }
 
+    .mode-btn {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.85);
+      color: #ff6b35;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 24px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .mode-btn:hover {
+      transform: scale(1.05);
+    }
+
+    body.night .mode-btn {
+      color: #1a2a4f;
+    }
+
+    body.night .punchline-btn {
+      background: #4a5d8a;
+    }
+
+    body.night .punchline-btn:hover {
+      background: #2c3e6b;
+    }
+
+    body.night .new-joke-btn {
+      color: #c8d4ec;
+      border-color: #c8d4ec;
+    }
+
+    body.night .new-joke-btn:hover {
+      background: #c8d4ec;
+      color: #0b1d3a;
+    }
+
+    body.night .joke-delivery {
+      color: #4a5d8a;
+    }
+
     .loading {
       color: #aaa;
       font-style: italic;
@@ -132,8 +185,8 @@
 </head>
 <body>
 
-  <div class="sun">☀️</div>
-  <h1>Good Morning! Here's your joke.</h1>
+  <div class="sun" id="icon">☀️</div>
+  <h1 id="greeting">Good Morning! Here's your joke.</h1>
 
   <div class="card">
     <div class="joke-setup" id="setup">Loading your morning joke...</div>
@@ -143,17 +196,24 @@
     <button class="new-joke-btn" id="newJokeBtn" style="display:none">Tell me another one</button>
   </div>
 
-  <footer>Powered by JokeAPI &mdash; Start every morning with a smile</footer>
+  <button class="mode-btn" id="modeBtn">🌙 Nighttime joke</button>
+
+  <footer id="footer">Powered by JokeAPI &mdash; Start every morning with a smile</footer>
 
   <script>
     const setupEl      = document.getElementById('setup');
     const deliveryEl   = document.getElementById('delivery');
     const punchlineBtn = document.getElementById('punchlineBtn');
     const newJokeBtn   = document.getElementById('newJokeBtn');
+    const modeBtn      = document.getElementById('modeBtn');
+    const iconEl       = document.getElementById('icon');
+    const greetingEl   = document.getElementById('greeting');
+    const footerEl     = document.getElementById('footer');
 
     async function loadJoke() {
+      const isNight = document.body.classList.contains('night');
       setupEl.className    = 'joke-setup loading';
-      setupEl.textContent  = 'Fetching a fresh joke...';
+      setupEl.textContent  = isNight ? 'Fetching a nighttime joke...' : 'Fetching a fresh joke...';
       deliveryEl.textContent = '';
       deliveryEl.classList.remove('visible');
       punchlineBtn.style.display = 'none';
@@ -178,12 +238,32 @@
       }
     }
 
+    function setMode(night) {
+      document.body.classList.toggle('night', night);
+      if (night) {
+        iconEl.textContent     = '🌙';
+        greetingEl.textContent = "Good Night! Here's your joke.";
+        footerEl.innerHTML     = 'Powered by JokeAPI &mdash; End every day with a smile';
+        modeBtn.textContent    = '☀️ Morning joke';
+      } else {
+        iconEl.textContent     = '☀️';
+        greetingEl.textContent = "Good Morning! Here's your joke.";
+        footerEl.innerHTML     = 'Powered by JokeAPI &mdash; Start every morning with a smile';
+        modeBtn.textContent    = '🌙 Nighttime joke';
+      }
+      loadJoke();
+    }
+
     punchlineBtn.addEventListener('click', () => {
       deliveryEl.classList.add('visible');
       punchlineBtn.style.display = 'none';
     });
 
     newJokeBtn.addEventListener('click', loadJoke);
+
+    modeBtn.addEventListener('click', () => {
+      setMode(!document.body.classList.contains('night'));
+    });
 
     loadJoke();
   </script>
